@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![Exam Question Generator Logo](https://via.placeholder.com/150/4a76a8/FFFFFF?text=EQG)
-
 **AI-powered exam question generation system**  
 *Create customized exam papers with a few clicks*
 
@@ -158,12 +156,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License.
-
-## 📬 Contact
-
-Naman Singh - [@NamanSingh69](https://github.com/NamanSingh69)
-
-Project Link: [https://github.com/NamanSingh69/exam-question-generator](https://github.com/NamanSingh69/exam-question-generator)
 
 ---
 
