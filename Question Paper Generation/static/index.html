@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Question Paper Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-bottom: 40px;
+        }
+
+        .custom-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: #4a76a8;
+            color: white;
+            font-weight: 600;
+            padding: 15px 20px;
+        }
+
+        .drag-drop-area {
+            border: 2px dashed #ced4da;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .drag-drop-area:hover, .drag-active {
+            background-color: #e9ecef;
+            border-color: #4a76a8;
+        }
+
+        .btn-primary {
+            background-color: #4a76a8;
+            border-color: #4a76a8;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a5b83;
+            border-color: #3a5b83;
+        }
+
+        .btn-outline-primary {
+            color: #4a76a8;
+            border-color: #4a76a8;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #4a76a8;
+            color: white;
+        }
+
+        .topic-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .topic-badge.selected {
+            background-color: #4a76a8;
+            color: white;
+        }
+
+        .question-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .question-type {
+            background-color: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .difficulty-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .difficulty-easy {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-hard {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .options-container {
+            margin-left: 20px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ced4da;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        .step-line {
+            height: 2px;
+            background-color: #ced4da;
+            width: 50px;
+            margin-top: 14px;
+        }
+
+        .step-active {
+            background-color: #4a76a8;
+        }
+
+        .step-completed {
+            background-color: #28a745;
+        }
+
+        .question-option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
+
+        .question-option input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background-color: #4a76a8;
+            z-index: 9999;
+            transition: width 0.3s;
+        }
+
+        .text-truncate-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Exam Question Paper Generator</h1>
+        
+        <div class="step-indicator">
+            <div class="step-dot step-active" id="step-1">1</div>
+            <div class="step-line"></div>
+            <div class="step-dot" id="step-2">2</div>
+            <div class="step-line"></div>
+            <div class="step-dot" id="step-3">3</div>
+        </div>
+
+        <!-- Step 1: Upload & Analysis -->
+        <div id="step-1-content">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <i class="bi bi-cloud-upload"></i> Upload Content
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="subject-input" class="form-label">Subject Name</label>
+                        <input type="text" class="form-control" id="subject-input" placeholder="Enter subject name">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Upload a File</label>
+                        <div id="drag-drop-area" class="drag-drop-area">
+                            <i class="bi bi-file-earmark-text display-4 mb-3"></i>
+                            <p>Drag & drop file here or</p>
+                            <label for="file-input" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Browse Files
+                            </label>
+                            <input type="file" id="file-input" class="d-none" accept=".pdf,.txt,.docx,.json,.md">
+                            <p class="mt-2 small text-muted">Supported formats: PDF, TXT, DOCX, JSON, Markdown</p>
+                        </div>
+                    </div>
+                    <div id="file-details" class="mb-4 d-none">
+                        <div class="alert alert-success">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5><i class="bi bi-file-earmark-check"></i> <span id="file-name"></span></h5>
+                                    <div class="small">Content preview:</div>
+                                    <div class="small text-truncate-container" id="content-preview"></div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" id="remove-file">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="analyze-btn" class="btn btn-primary" disabled>
+                            <i class="bi bi-search"></i> Analyze Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Configuration -->
+        <div id="step-2-content" class="d-none">
+            <div class="card custom-card">
+                <div class="card-header">
+                    <i class="bi bi-gear"></i> Configure Question Paper
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Number of Questions</label>
+                            <input type="number" class="form-control" id="num-questions" min="1" max="50" value="10">
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">Difficulty Level</label>
+                            <select class="form-select" id="difficulty-select">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Mixed">Mixed (Combination)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Question Types</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input question-type-check" type="checkbox" value="MCQ" id="mcq-check" checked>
+                                    <label class="form-check-label" for="mcq-check">
+                                        Multiple Choice
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input question-type-check" type="checkbox" value="Short Answer" id="short-check" checked>
+                                    <label class="form-check-label" for="short-check">
+                                        Short Answer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input question-type-check" type="checkbox" value="Essay" id="essay-check">
+                                    <label class="form-check-label" for="essay-check">
+                                        Essay/Long Answer
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Topics</label>
+                        <p class="small text-muted mb-2">Select topics to include in the question paper (Click to toggle selection)</p>
+                        <div id="topics-container" class="mb-3"></div>
+                        <div class="d-flex justify-content-between">
+                            <button id="select-all-topics" class="btn btn-sm btn-outline-primary">Select All</button>
+                            <button id="deselect-all-topics" class="btn btn-sm btn-outline-primary">Deselect All</button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button id="back-to-step-1" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                        <button id="generate-questions-btn" class="btn btn-primary">
+                            <i class="bi bi-lightning"></i> Generate Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Results & Export -->
+        <div id="step-3-content" class="d-none">
+            <div class="card custom-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark-text"></i> Generated Question Paper
+                    </div>
+                    <div>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-primary" id="export-btn">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" id="export-pdf">PDF</a></li>
+                                <li><a class="dropdown-item" href="#" id="export-html">HTML</a></li>
+                                <li><a class="dropdown-item" href="#" id="export-md">Markdown</a></li>
+                            </ul>
+                        </div>
+                        <div class="form-check form-check-inline ms-2">
+                            <input class="form-check-input" type="checkbox" id="include-answers">
+                            <label class="form-check-label" for="include-answers">Include Answers</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="exam-title" class="form-label">Exam Title</label>
+                        <input type="text" class="form-control" id="exam-title" placeholder="Enter exam title">
+                    </div>
+                    <div id="questions-container" class="mt-4">
+                        <!-- Questions will be displayed here -->
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <button id="back-to-step-2" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Configuration
+                        </button>
+                        <button id="regenerate-btn" class="btn btn-primary">
+                            <i class="bi bi-arrow-clockwise"></i> Regenerate Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong class="me-auto" id="toast-title">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                Hello, world! This is a toast message.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/main.js"></script>
+</body>
+</html>
